@@ -2,12 +2,7 @@ require_relative 'menu_work'
 include MenuWork
 
 #Welcome messages prints here
-def welcome_screen
-  puts ""
-  puts "===================================================================".center(144)
-  puts "!! Welcome to our Vending Machine !!".center(144)
-  puts "===================================================================".center(144) 
-end
+
 
 public
 def price_by_selection(selection)
@@ -38,21 +33,21 @@ def get_quantity(selection)
   end
 end
 
-def cancel_method
-  puts "Enter 1 to continue or 2 to cancel."
-  cancel = gets.chomp.to_i
+# def cancel_method
+#   puts "Enter 1 to continue or 2 to cancel."
+#   cancel = gets.chomp.to_i
 
-  if cancel.eql? 1
-    get_quantity(selection)
-  elsif cancel.eql? 2
-    puts "Your order cancelled"
-    puts "========= Thank You! ========="
-    exit!
-  else
-    puts "Please enter valid input..."
-    cancel_method
-  end
-end
+#   if cancel.eql? 1
+#     get_quantity(selection)
+#   elsif cancel.eql? 2
+#     puts "Your order cancelled"
+#     puts "========= Thank You! ========="
+#     exit!
+#   else
+#     puts "Please enter valid input..."
+#     cancel_method
+#   end
+# end
 
 class VendingMachine                         #Main Class Vending Machine
   def self.clear
@@ -60,11 +55,11 @@ class VendingMachine                         #Main Class Vending Machine
   end
 
   def start
-    welcome_screen
     selection = menus        #Module Method
     VendingMachine.clear
     menu_choosen(selection)  #Module Method
-    cancel_method
+    get_quantity(selection)
+    # cancel_method
   end
 end
 
