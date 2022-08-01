@@ -1,8 +1,6 @@
-module ItemsModule
   class Items
     ALL_ITEMS = [] 
     attr_accessor :id, :name, :price
-    
     def initialize(name, price)
       @id = set_incremental_id
       @name = name
@@ -30,9 +28,13 @@ module ItemsModule
       def all
         ALL_ITEMS
       end
+
+      def clear
+        print "\e[2J\e[f"
+      end
     end
   end
-end
+
 
 # [ 
 #   ["Pepsi", 1],
