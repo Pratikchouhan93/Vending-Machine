@@ -28,7 +28,7 @@
       def all
         ALL_ITEMS
       end
-
+      
       def clear
         print "\e[2J\e[f"
       end
@@ -51,4 +51,6 @@
 # puts "Id Name Price"
 # ItemsData::Items.all.each do |item|
 #   puts "#{item.id} #{item.name} #{item.price}"
+
 # end
+
