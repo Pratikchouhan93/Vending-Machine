@@ -13,32 +13,37 @@ module AdminPage
     Items.clear
     case admin_selection
     when 1
-      puts "Id Name Price"
-      Items.all.each do |item|
-        puts "#{item.id}- #{item.name} #{item.price}"
+      if Items.all.empty?()
+        puts "Vending Machine is empty!!".red
+      else
+        puts "Id | Name | Price | Quantity"
+        Items.all.each do |item|
+          puts "#{item.id}-   #{item.name}   #{item.price}      #{item.quantity}"
+        end
       end
     when 2
       add_item_task
     when 3
-      puts "Please enter name and price, what you want to delete: "
-      print "name:  "
-      name = gets.chomp
-      print "price:  "
-      price = gets.chomp.to_i
-      puts ""
-      # delete_item_task(name, price)
-      puts "Item Deleted."
+      puts "Please enter name, what you want to remove: "
+      print "Item Name: "
+      name = gets.strip
+
+      puts "How many #{name} do you want to remove: "     
+      print "#{name} Quantity: "
+      quantity = gets.strip.to_i
+
+      delete_item_task(name, quantity)
     when 4
       find_item_task
     when 5
-      # LoginModule.welcome_screen
+      Login.login_selection
     when 6
       exit!
     else
       puts "Please select valid option..".red
       admin_menu
     end
-    puts "Enter any key to continue: ".green
+    puts "Enter any key to continue: ".red
     gets
     admin_menu
   end
@@ -61,34 +66,46 @@ module AdminPage
 
   def add_item_task
     puts "Please Enter item name: "
-    item_name = gets.chomp 
-    puts "Please Enter item price: "
-    item_price = gets.chomp.to_i
-    Items.create(item_name, item_price)
-    puts "1 item added successfully.\n"
-    cancel_method  
+    name = gets.strip
+    puts "Please Enter #{name} price: "
+    price = gets.strip.to_i
+    puts "Please Enter #{name} quantity: "
+    quantity = gets.strip.to_i
+    if name.empty? || price == 0 || quantity == 0
+      puts "Please fill in all the required fields.\n".red
+      add_item_task 
+    else
+      Items.create(name, price, quantity)
+      puts "#{quantity} #{name} added successfully.\n".green
+      cancel_method 
+    end 
   end
 
   def find_item_task
     puts "Please Enter Item what do you want to find: ".green
-    name = gets.chomp
+    name = gets.strip
     unless Items.find_by(name).empty?
+      puts "Id|Name | Price | Quantity"
       Items.find_by(name).each { |item| 
-      puts "#{item.id}- #{item.name} #{item.price}" }
-    else
-      puts " !!Item does not exist!! ".red
+        puts "#{item.id}-   #{item.name}   #{item.price}      #{item.quantity}" }
+      else
+        puts "!!Item does not exist!!".red
+      end
+    end
+
+    def delete_item_task(name, quantity)
+      find_arr = Items.find_by(name)
+      if find_arr.empty?
+        puts "Item not available!!\n".red
+      else
+        find_arr.find { |item| 
+          if item.quantity >= quantity
+            item.quantity -= quantity
+            puts "=> Please collect your #{quantity} #{name}.".green
+          else
+            puts "Sorry only #{item.quantity} #{name} left.".red
+          end
+        }
+      end
     end
   end
-
-  def delete_item_task(name, price)
-    # unless Items.find_by(name).empty?
-    delete_obj = Items::ALL_ITEMS.select { |item| 
-      item.name == name
-      item.price == price }
-    Items::ALL_ITEMS.delete(delete_obj)
-    # Items.new(name, price).destroy
-    # else
-    #   puts " !!Item does not exist!! ".red
-    # end
-  end
-end
