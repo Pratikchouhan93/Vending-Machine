@@ -1,28 +1,25 @@
 require 'colorize'
-require_relative 'crud_operation'
+require_relative 'items'
+
 module AdminPage
+
   def admin_menu
+    Items.clear
     puts "Please select option what you want to do: ".green
     puts "1. View all items."
     puts "2. Add any item."
     puts "3. Remove any item."
     puts "4. Find any item."
-    puts "5. Logout!"
-    puts "6. Close!"
+    puts "5. View all users."
+    puts "6. Logout!"
+    puts "0. Close!"
     admin_selection = gets.chomp.to_i
     Items.clear
     case admin_selection
     when 1
-      if Items.all.empty?()
-        puts "Vending Machine is empty!!".red
-      else
-        puts "Id | Name | Price | Quantity"
-        Items.all.each do |item|
-          puts "#{item.id}-   #{item.name}   #{item.price}      #{item.quantity}"
-        end
-      end
+      Items.display_all
     when 2
-      add_item_task
+      add_item
     when 3
       puts "Please enter name, what you want to remove: "
       print "Item Name: "
@@ -32,12 +29,21 @@ module AdminPage
       print "#{name} Quantity: "
       quantity = gets.strip.to_i
 
-      delete_item_task(name, quantity)
+      delete_item(name, quantity)
     when 4
-      find_item_task
+      find_item
     when 5
-      Login.login_selection
+      if Users.all.empty?()
+        puts "No users available!!".red
+      else
+        puts "Id | Name | Email"
+        Users.all.each do |user|
+          puts "#{user.id} #{user.name} #{user.email}"
+        end
+      end
     when 6
+      Login.user_selection
+    when 0
       exit!
     else
       puts "Please select valid option..".red
@@ -55,7 +61,7 @@ module AdminPage
     cancel = gets.chomp.to_i
     puts ""
     if cancel.eql? 1
-      add_item_task
+      add_item
     elsif cancel.eql? 2
       admin_menu
     else
@@ -64,7 +70,7 @@ module AdminPage
     end
   end
 
-  def add_item_task
+  def add_item
     puts "Please Enter item name: "
     name = gets.strip
     puts "Please Enter #{name} price: "
@@ -73,7 +79,7 @@ module AdminPage
     quantity = gets.strip.to_i
     if name.empty? || price == 0 || quantity == 0
       puts "Please fill in all the required fields.\n".red
-      add_item_task 
+      add_item 
     else
       Items.create(name, price, quantity)
       puts "#{quantity} #{name} added successfully.\n".green
@@ -81,31 +87,25 @@ module AdminPage
     end 
   end
 
-  def find_item_task
+  def find_item
     puts "Please Enter Item what do you want to find: ".green
     name = gets.strip
-    unless Items.find_by(name).empty?
+    unless Items.find_by(name).nil? 
       puts "Id|Name | Price | Quantity"
-      Items.find_by(name).each { |item| 
-        puts "#{item.id}-   #{item.name}   #{item.price}      #{item.quantity}" }
-      else
-        puts "!!Item does not exist!!".red
-      end
-    end
-
-    def delete_item_task(name, quantity)
-      find_arr = Items.find_by(name)
-      if find_arr.empty?
-        puts "Item not available!!\n".red
-      else
-        find_arr.find { |item| 
-          if item.quantity >= quantity
-            item.quantity -= quantity
-            puts "=> Please collect your #{quantity} #{name}.".green
-          else
-            puts "Sorry only #{item.quantity} #{name} left.".red
-          end
-        }
-      end
+      Items.find_by(name)&.display
+    else
+      puts "!!Item does not exist!!".red
     end
   end
+
+  def delete_item(name, quantity)
+    item = Items.find_by(name)
+    return puts "Item not available!!\n".red if item.nil?
+    return_qty = item.decrement_quantity_by!(quantity)
+    if return_qty >= 0
+      puts "=> Please collect your #{count} #{name}.".green
+    else
+      return
+   end
+  end
+end
