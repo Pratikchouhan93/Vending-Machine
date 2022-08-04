@@ -1,7 +1,10 @@
 require 'colorize'
-require_relative 'crud_operation'
+require_relative 'items'
+
 module CustomerPage
+
   def customer_menu
+    Items.clear
     puts "Please select option what you want to do: ".green
     puts "1. View all items."
     puts "2. Find any item."
@@ -23,7 +26,7 @@ module CustomerPage
         end
       end
     when 2
-      find_item_task
+      find_item
     when 3
       puts "Please enter item name, what you want to buy: "
       print "Item Name: "
@@ -32,53 +35,36 @@ module CustomerPage
       puts "How many #{name} do you want to buy: "     
       print "#{name} Quantity: "
       quantity = gets.strip.to_i
-
-      buy_item_task(name, quantity)
+      item_qty = Items.find_by(name)&.quantity
+      if item_qty >= quantity
+        buy_item(name, quantity)
+      else
+        puts "Sorry only #{item_qty} #{name} left.".red
+      end
     when 4
-      Login.login_selection
+      Login.user_selection
     when 5
       exit!
     else
       puts "Please select valid option..".red
       customer_menu
     end
-    puts "Enter any key to continue: ".red
+    print "Enter any key to continue: ".red
     gets
     customer_menu
   end
 
-  def find_item_task
-    puts "Please Enter Item what do you want to find: ".green
-    name = gets.strip
-    unless Items.find_by(name).empty?
-      puts "Id|Name | Price | Quantity"
-      Items.find_by(name).each { |item| 
-        puts "#{item.id}-   #{item.name}   #{item.price}      #{item.quantity}" }
-    else
-        puts "!!Item does not exist!!".red
-    end
+  def buy_item(name, quantity)
+    item_arr = Items.find_by(name)
+    return puts "Item not available!!\n".red if item_arr.nil?
+    bill_request(item_arr.name, item_arr.price, quantity, item_arr)
   end
 
-  def buy_item_task(name, quantity)
-    find_arr = Items.find_by(name)
-    if find_arr.empty?
-      puts "Item not available!!\n".red
-    else
-      find_arr.find { |item| 
-        if item.quantity >= quantity
-          bill_request(item.name, item.price, quantity, find_arr)
-        else
-          puts "Sorry only #{item.quantity} #{name} left.".red
-        end
-      }
-    end
-  end
-
-  def bill_request(name, price, quantity, find_arr)
+  def bill_request(name, price, quantity, item_arr)
     cost = price * quantity
     puts "You have to pay #{cost} rupees.".green
     continue_method
-    bill_amount(name, cost, quantity, find_arr)
+    bill_amount(name, cost, quantity, item_arr)
   end
 
   def continue_method
@@ -95,23 +81,27 @@ module CustomerPage
     end
   end
 
-  def bill_amount(name, cost, quantity, find_arr)
+  def bill_amount(name, cost, quantity, item_arr)
     puts "Please enter money: "
     amount = gets.strip.to_i
-    total_amount = add_more_money(amount)
-    puts "Total money paid by you is Rs: #{total_amount}"
-    if cost < total_amount
-      puts "=> Please collect your #{quantity} #{name}.".green
-      change = total_amount - cost
-      puts "Please collect your change: #{change} rupees.".green
-      puts "=========Thank You for using our Vending Machine=========".red
-      find_arr.find { |item| item.quantity -= quantity }
-    elsif cost == total_amount
-      puts "=> Please collect your #{quantity} #{name}.".green
-      puts "=========Thank You for using our Vending Machine=========".red
-      find_arr.find { |item| item.quantity -= quantity }
+    amount = add_more_money(amount)
+    puts "Total money paid by you is Rs: #{amount}"
+    if cost < amount
+      puts "=> Please collect your #{quantity} #{name}. <=".green.center(144)
+      change = amount - cost
+      puts "=> Please collect your change: #{change} rupees. <=".green.center(144)
+      puts "=========Thank You for using our Vending Machine=========".red.center(144)
+      item_arr.decrement_quantity_by!(quantity)
+    elsif cost == amount
+      puts "=> Please collect your #{quantity} #{name}.".green.center(144)
+      puts "=============Thank You for using our Vending Machine=============".red.center(144)
+      item_arr.decrement_quantity_by!(quantity)
     else
-      puts "Order Failed!! - You have entered less money.!!".red
+      puts " Order Failed!! - You have entered less money.!!\n".red.center(144)
+      puts "=> Please collect your money: #{amount} rupees. <=".green.center(144)
+      puts "=============Thank You for using our Vending Machine=============".red.center(144)
+      print "Enter any key to continue: ".red.center(144)
+      gets
       customer_menu
     end
   end
@@ -129,7 +119,7 @@ module CustomerPage
       return amount
     else
       puts "Please enter valid input.".red
-      continue_method
+      return add_more_money(amount)
     end
   end
 end
