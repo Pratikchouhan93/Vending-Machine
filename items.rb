@@ -36,7 +36,11 @@ class Items
   end
 
   def display
-    puts "#{id}-   #{name}   #{price}      #{quantity}"
+    puts "#{id}  #{name}   #{price}   #{quantity}"
+  end
+
+  def create_row
+    @@rows << [id, name, price, quantity]
   end
 
   class << self
@@ -45,11 +49,16 @@ class Items
     end
 
     def find_by(name)
-      all.select { |item| item.name == name }.first
+      all.select { |item| item.name.casecmp? name }.first
     end
 
     def all
       ALL_ITEMS
+    end
+
+    def print_table
+      table = Terminal::Table.new :rows => @@rows
+      puts table
     end
 
     def clear
@@ -57,11 +66,13 @@ class Items
     end
 
     def display_all
+      @@rows = []
       if all.empty?
         puts "Vending Machine is empty!!".red      
       else
-        puts "Id | Name | Price | Quantity"
-        all.each { |item| item.display }
+        puts "Id  .  Name  .Price.Quantity"
+        all.each { |item| item.create_row }
+        print_table
       end
     end
   end

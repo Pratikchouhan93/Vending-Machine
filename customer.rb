@@ -90,7 +90,7 @@ module CustomerPage
       puts "=> Please collect your #{quantity} #{name}. <=".green.center(144)
       change = amount - cost
       puts "=> Please collect your change: #{change} rupees. <=".green.center(144)
-      puts "=========Thank You for using our Vending Machine=========".red.center(144)
+      puts "=============Thank You for using our Vending Machine=============".red.center(144)
       item_arr.decrement_quantity_by!(quantity)
     elsif cost == amount
       puts "=> Please collect your #{quantity} #{name}.".green.center(144)

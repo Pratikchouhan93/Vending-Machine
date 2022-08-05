@@ -2,6 +2,7 @@ require_relative 'admin'
 require_relative 'customer'
 require_relative 'users'
 require_relative 'seed'
+require 'terminal-table'
 require 'colorize'
 
 class Login
