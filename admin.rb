@@ -33,14 +33,7 @@ module AdminPage
     when 4
       find_item
     when 5
-      if Users.all.empty?()
-        puts "No users available!!".red
-      else
-        puts "Id | Name | Email"
-        Users.all.each do |user|
-          puts "#{user.id} #{user.name} #{user.email}"
-        end
-      end
+      Users.display_all
     when 6
       Login.user_selection
     when 0
